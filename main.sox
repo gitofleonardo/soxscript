@@ -1,0 +1,19 @@
+# Author gitofleonardo
+
+fun main() {
+    var a = 200;
+    println("hello world");
+
+    var b = 0;
+    while (b < 5) {
+        b = b + 1;
+        println(b);
+    }
+
+   for(var i = 0; i < 5; i = i + 1) {
+        println(i);
+   }
+}
+
+main();
+println("hello world");

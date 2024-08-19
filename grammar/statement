@@ -1,0 +1,31 @@
+program                 ->  <statement><program>|^
+statement               ->  <declare_statement>|<expr_statement>|<print_statement>|<block>|<if_statement>
+                            |<while_statement>|<for_statement>|<return_statement>
+
+declare_statement       ->  <var_declaration>|<fun_declaration>|
+
+var_declaration         ->  VAR IDENTIFIER<declare_stmt_tail>SEMICOLON
+declare_statement_tail  ->  EQUAL<expr>|^
+
+fun_declaration         ->  FUN IDENTIFIER L_PAREN<parameters>R_PAREN<block>
+parameters              ->  IDENTIFIER<parameters_tail>
+parameters_tail         ->  COMMA<parameters_tail>|^
+
+expr_statement          ->  <expr>SEMICOLON
+print_statement         ->  PRINT<expr>SEMICOLON
+
+block                   ->  L_BRACE<statement>R_BRACE
+
+if_statement            ->  IF L_PAREN<expression>R_PAREN<statement><if_tail>
+if_tail                 ->  ELSE<statement>|^
+
+while_statement         ->  WHILE L_PAREN<expression>R_PAREN<statement>
+
+for_statement           ->  FOR L_PAREN<for_init><for_condition><for_increment>R_PAREN<statement>
+for_init                ->  <declare_statement>|<expr_statement>|SEMICOLON
+for_condition           ->  <for_condition_head>SEMICOLON
+for_condition_head      ->  <expr>|^
+for_increment           ->  <expr>|^
+
+return_statement        ->  RETURN<return_body>SEMICOLON
+return_body             ->  <expr>|^

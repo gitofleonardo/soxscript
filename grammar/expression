@@ -1,0 +1,53 @@
+## Expr (priority not included)
+
+expr                ->  <literal>|<unary>|<binary>|<grouping>
+
+literal             ->  NUMBER|STRING|TRUE|FALSE|NIL
+grouping            ->  L_PAREN <expr> R_PAREN
+
+unary               ->  MINUS <expr>|BANG <expr>
+unary               ->  <unary_head><expr>
+unary_head          ->  MINUS|BANG
+
+binary              ->  <expr><operator><expr>
+operator            ->  EQUAL_EQUAL|BANG_EQUAL|LESS|LESS_EQUAL|GREATER|GREATER_EQUAL|PLUS|MINUS|STAR|SLASH
+
+## Expr (priority included)
+
+expr                ->  <assignment>
+
+assignment          ->  IDENTIFIER EQUAL<assignment>|<logic_or>
+
+logic_or            ->  <logic_and><logic_or_tail>
+logic_or_tail       ->  OR<logic_and><logic_or>|^
+logic_and           ->  <ternary><logic_and_tail>
+logic_and_tail      ->  AND<ternary><logic_and_tail>|^
+
+ternary             ->  <equality><equality_tail>
+equality_tail       ->  QUESTION_MARK<equality>COLON<equality><equality_tail>|^
+
+equality            ->  <comparison><comparison_tail>
+comparison          ->  <term><term_tail>
+comparison_tail     ->  <equal_symbol><comparison><comparison_tail>|^
+equal_symbol        ->  EQUAL_EQUAL|BANG_EQUAL
+term_tail           ->  <comp_symbol><term><term_tail>|^
+comp_tail           ->  GREATER|GREATER_EQUAL|LESS|LESS_EQUAL
+
+term                ->  <factor><factor_tail>
+factor              ->  <unary><unary_tail>
+factor_tail         ->  <plus_sub><factor><factor_tail>|^
+plus_sub            ->  PLUS|MINUS
+unary_tail          ->  <div_mul><unary><unary_tail>|^
+div_mul             ->  SLASH|STAR
+
+unary               ->  <unary_symbol><unary>|<call>
+unary_symbol        ->  BANG|MINUS|PLUS
+
+call                ->  <primary><call_tail>
+primary             ->  NUMBER|STRING|TRUE|FALSE|NIL|L_PAREN<expr>R_PAREN|IDENTIFIER
+call_tail           ->  <call_tail_method><call_tail>|^
+call_tail_method    ->  <method_call>
+method_call         ->  L_PAREN<args>R_PAREN
+args                ->  <expr><args_tail>|^
+args_tail           ->  COMMA<expr>|^
+args_tail           ->  COMMA<expr>|^
