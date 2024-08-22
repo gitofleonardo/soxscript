@@ -8,6 +8,8 @@
 #include <utility>
 #include <memory>
 
+#include "../lexical/value_holder.hpp"
+
 class ParserError final : public std::exception {
 };
 

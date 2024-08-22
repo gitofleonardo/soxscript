@@ -233,7 +233,8 @@ std::shared_ptr<ValueHolder> Interpreter::visitLiteralExpr(LiteralExpr *expr) {
     std::shared_ptr<ValueHolder> result;
     switch (expr->value->type()) {
         case STRING: {
-            auto str = std::string(*expr->value->lexeme());
+            const auto lexeme = expr->value->lexeme();
+            auto str = lexeme->substr(1, lexeme->length() - 2);
             result = std::make_shared<StringValueHolder>(str);
             break;
         }

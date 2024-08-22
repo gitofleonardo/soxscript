@@ -7,13 +7,15 @@ fun main() {
     var b = 0;
     while (b < 5) {
         b = b + 1;
-        println(b);
+        print(b);
     }
 
+   println("");
    for(var i = 0; i < 5; i = i + 1) {
-        println(i);
+        print(i);
    }
 }
 
 main();
+println("");
 println("hello world");

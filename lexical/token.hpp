@@ -5,6 +5,7 @@
 #ifndef TOKEN_HPP
 #define TOKEN_HPP
 
+#include <string>
 #include "token_type.hpp"
 
 class Token {
