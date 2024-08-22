@@ -130,9 +130,9 @@ void Resolver::resolveFunction(const FunctionStmt *func) {
 }
 
 void Resolver::resolveLocalVariable(Expr *expr, const std::string *name) const {
-    for (int i = _scopes.size() - 1; i >= 0; i--) {
+    for (int i = static_cast<int>(_scopes.size()) - 1; i >= 0; i--) {
         if (_scopes[i].contains(*name)) {
-            _interpreter->resolve(_scopes.size() - 1 - i, expr);
+            _interpreter->resolve(static_cast<int>(_scopes.size()) - 1 - i, expr);
             return;
         }
     }

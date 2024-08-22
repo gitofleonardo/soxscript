@@ -6,7 +6,6 @@
 #define TOKEN_HPP
 
 #include "token_type.hpp"
-#include "value_holder.hpp"
 
 class Token {
     TokenType _type;

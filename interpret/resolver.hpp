@@ -72,7 +72,7 @@ protected:
     void visitReturnStmt(ReturnStmt *stmt) override;
 
 public:
-    Resolver(Interpreter *interpreter);
+    explicit Resolver(Interpreter *interpreter);
     ~Resolver() override;
 
     void resolve(std::vector<Stmt *> *stmts);

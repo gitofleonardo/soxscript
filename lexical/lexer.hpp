@@ -5,7 +5,6 @@
 #ifndef LEXER_HPP
 #define LEXER_HPP
 
-#include <iostream>
 #include <vector>
 #include "token.hpp"
 
