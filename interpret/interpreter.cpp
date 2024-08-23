@@ -93,7 +93,7 @@ void Interpreter::visitWhileStmt(WhileStmt *stmt) {
 
 void Interpreter::visitFunctionStmt(FunctionStmt *stmt) {
     const auto func = std::static_pointer_cast<ValueHolder>(
-        std::make_shared<FunctionHolder>(new FunctionCallable(stmt, _currentScope, false)));
+        std::make_shared<CallableHolder>(makeSharedCallable(new FunctionCallable(stmt, _currentScope, false))));
     _currentScope->define(*stmt->name->lexeme(), func);
 }
 
@@ -343,15 +343,19 @@ std::shared_ptr<ValueHolder> Interpreter::visitLogicalExpr(LogicalExpr *expr) {
 
 std::shared_ptr<ValueHolder> Interpreter::visitCallExpr(CallExpr *expr) {
     const auto callee = evaluate(expr->callee);
-    Callable *callable;
+    const auto paramSize = expr->arguments->size();
+    Callable *callable = nullptr;
     if (const auto holder = dynamic_cast<CallableHolder *>(callee.get())) {
-        callable = holder->callable;
-    } else if (const auto funcHolder = dynamic_cast<FunctionHolder *>(callee.get())) {
-        callable = funcHolder->func;
+        for (const auto& c : holder->callables) {
+            if (paramSize == c->parameterSize()) {
+                callable = c.get();
+                break;
+            }
+        }
+        if (callable == nullptr) {
+            throw RuntimeError();
+        }
     } else {
-        throw RuntimeError();
-    }
-    if (expr->arguments->size() != callable->parameterSize()) {
         throw RuntimeError();
     }
     std::vector<std::shared_ptr<ValueHolder> > realArgs;

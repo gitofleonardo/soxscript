@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <utility>
 
+#include "callable.hpp"
+
 std::shared_ptr<ValueHolder> RuntimeScope::UNINITIALIZED_OBJECT = std::make_shared<ValueHolder>();
 
 RuntimeScope::RuntimeScope(std::shared_ptr<RuntimeScope> parentScope): _parent(std::move(parentScope)) {
@@ -15,7 +17,24 @@ RuntimeScope::RuntimeScope(std::shared_ptr<RuntimeScope> parentScope): _parent(s
 
 std::shared_ptr<ValueHolder> RuntimeScope::define(const std::string &name, std::shared_ptr<ValueHolder> value) {
     std::shared_ptr<ValueHolder> oldVal = _definitions[name];
-    _definitions[name] = std::move(value);
+    const auto oldFun = dynamic_cast<CallableHolder *>(oldVal.get());
+    if (const auto newFun = dynamic_cast<CallableHolder *>(value.get()); oldFun && newFun) {
+        // Merge functions
+        auto oldFunMap = std::map<int, std::shared_ptr<Callable>>();
+        for (const auto &oldF : oldFun->callables) {
+            oldFunMap[oldF->parameterSize()] = oldF;
+        }
+        for (const auto &newF: newFun->callables) {
+            oldFunMap[newF->parameterSize()] = newF;
+        }
+        oldFun->callables.clear();
+        for (const auto &oldF : oldFunMap) {
+            oldFun->callables.push_back(oldF.second);
+        }
+    } else {
+        // Replace symbol
+        _definitions[name] = std::move(value);
+    }
     return oldVal;
 }
 
@@ -45,7 +64,7 @@ std::shared_ptr<ValueHolder> RuntimeScope::get(const int depth, const std::strin
     return ancestorScope(depth, this)->_definitions.at(name);
 }
 
-std::shared_ptr<ValueHolder> RuntimeScope::assign(const std::string &name, const std::shared_ptr<ValueHolder>& value) {
+std::shared_ptr<ValueHolder> RuntimeScope::assign(const std::string &name, const std::shared_ptr<ValueHolder> &value) {
     if (_definitions.contains(name)) {
         const auto oldVal = _definitions[name];
         _definitions[name] = value;

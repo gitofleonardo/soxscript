@@ -6,6 +6,9 @@
 #define VALUE_HOLDER_HPP
 
 #include <string>
+#include <vector>
+
+#include "token.hpp"
 
 class ValueHolder {
 public:
@@ -76,22 +79,14 @@ public:
     }
 };
 
-class FunctionCallable;
 class Callable;
-
-class FunctionHolder final : public ValueHolder {
-public:
-    FunctionCallable *func;
-
-    explicit FunctionHolder(FunctionCallable *function) : func(function) {
-    }
-};
 
 class CallableHolder final : public ValueHolder {
 public:
-    Callable *callable;
+    std::vector<std::shared_ptr<Callable>> callables;
 
-    explicit CallableHolder(Callable *callable) : callable(callable) {
+    explicit CallableHolder(const std::shared_ptr<Callable>& callable) {
+        callables.push_back(callable);
     }
 };
 

@@ -5,7 +5,9 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 #include <map>
+#include <memory>
 
+#include "../interpret/callable.hpp"
 #include "../lexical/token_type.hpp"
 
 class SoxKeywords {
@@ -24,24 +26,23 @@ class SoxKeywords {
         _keywords.insert(std::make_pair("var", VAR));
         _keywords.insert(std::make_pair("while", WHILE));
     }
+
 public:
     ~SoxKeywords() {
         delete _sInstance;
     }
 
-    [[nodiscard]] TokenType getKeyword(const std::string& kw) const {
+    [[nodiscard]] TokenType getKeyword(const std::string &kw) const {
         if (!_keywords.contains(kw)) {
             return IDENTIFIER;
         }
         return _keywords.at(kw);
     }
 
-    static SoxKeywords* instance() {
+    static SoxKeywords *instance() {
         return _sInstance;
     }
 };
-
-SoxKeywords* SoxKeywords::_sInstance = new SoxKeywords;
 
 inline bool isLetter(const char c) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
@@ -69,6 +70,10 @@ inline bool isLegalOctalNumber(const char c) {
 
 inline bool isLegalBinaryNumber(const char c) {
     return c >= '0' && c <= '1';
+}
+
+inline std::shared_ptr<Callable> makeSharedCallable(Callable *callable) {
+    return std::shared_ptr<Callable>(callable);
 }
 
 #endif //UTILS_HPP

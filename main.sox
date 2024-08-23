@@ -16,6 +16,13 @@ fun main() {
    }
 }
 
+fun main(a) {
+    println("hello " + a);
+}
+
+main("Sox");
 main();
+println("");
+main("Leo");
 println("");
 println("hello world");

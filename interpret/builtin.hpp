@@ -8,6 +8,7 @@
 
 #include "callable.hpp"
 #include "runtime_scope.hpp"
+#include "../utils/utils.hpp"
 
 class PrintCallable final : public Callable {
 public:
@@ -40,8 +41,8 @@ public:
 };
 
 inline void initGlobalScope(RuntimeScope *globalScope) {
-    globalScope->define("print", std::make_shared<CallableHolder>(new PrintCallable));
-    globalScope->define("println", std::make_shared<CallableHolder>(new PrintlnCallable));
+    globalScope->define("print", std::make_shared<CallableHolder>(makeSharedCallable(new PrintCallable)));
+    globalScope->define("println", std::make_shared<CallableHolder>(makeSharedCallable(new PrintlnCallable)));
 }
 
 #endif //BUILTIN_HPP

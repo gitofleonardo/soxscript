@@ -24,4 +24,5 @@ add_executable(soxsh main.cpp
         interpret/callable.hpp
         interpret/resolver.cpp
         interpret/resolver.hpp
-        interpret/builtin.hpp)
+        interpret/builtin.hpp
+        utils/utils.cpp)
