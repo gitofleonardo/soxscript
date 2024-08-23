@@ -44,7 +44,6 @@ public:
         const auto funScope = std::make_shared<RuntimeScope>(_scope);
         for (int i = 0; i < args.size(); i++) {
             funScope->define(*_fun->params->at(i)->lexeme(), args[i]);
-            ++i;
         }
         try {
             interpreter->executeBlock(_fun->bodyBlock->stmts, funScope);

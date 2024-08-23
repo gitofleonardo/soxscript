@@ -16,13 +16,13 @@ fun main() {
    }
 }
 
-fun main(a) {
-    println("hello " + a);
+fun main(a, b) {
+    println("hello " + a + ", " + b);
 }
 
-main("Sox");
+main("Sox", "fun");
 main();
 println("");
-main("Leo");
+main("Leo", "fun");
 println("");
 println("hello world");
