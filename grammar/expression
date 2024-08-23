@@ -16,7 +16,9 @@ operator            ->  EQUAL_EQUAL|BANG_EQUAL|LESS|LESS_EQUAL|GREATER|GREATER_E
 
 expr                ->  <assignment>
 
-assignment          ->  IDENTIFIER EQUAL<assignment>|<logic_or>
+assignment          ->  <assignment_head>EQUAL<assignment>|<logic_or>
+assignment_head     ->  IDENTIFIER<assign_tail>
+assign_tail         ->  <indexed_call><assign_tail>|^
 
 logic_or            ->  <logic_and><logic_or_tail>
 logic_or_tail       ->  OR<logic_and><logic_or>|^
@@ -44,10 +46,16 @@ unary               ->  <unary_symbol><unary>|<call>
 unary_symbol        ->  BANG|MINUS|PLUS
 
 call                ->  <primary><call_tail>
-primary             ->  NUMBER|STRING|TRUE|FALSE|NIL|L_PAREN<expr>R_PAREN|IDENTIFIER
-call_tail           ->  <call_tail_method><call_tail>|^
-call_tail_method    ->  <method_call>
+primary             ->  NUMBER|STRING|TRUE|FALSE|NIL|L_PAREN<expr>R_PAREN|IDENTIFIER|<array>
+call_tail           ->  <call_type><call_tail>|^
+call_type           ->  <method_call>|<indexed_call>
 method_call         ->  L_PAREN<args>R_PAREN
 args                ->  <expr><args_tail>|^
 args_tail           ->  COMMA<expr>|^
 args_tail           ->  COMMA<expr>|^
+
+array               ->  L_BRACKET<array_content>R_BRACKET
+array_content       ->  <expr><array_content_tail>|^
+array_content_tail  ->  COMMA<expr>|^
+
+indexed_call        ->  L_BRACKET<expr>R_BRACKET

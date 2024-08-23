@@ -79,7 +79,7 @@ public:
     Expr *condition;
 
     TernaryExpr(Expr *left, Expr *right, Expr *condition): left(left), right(right),
-                                                                             condition(condition) {
+                                                           condition(condition) {
     }
 
     ~TernaryExpr() override {
@@ -147,6 +147,55 @@ public:
     }
 };
 
+class IndexedCallExpr final : public Expr {
+public:
+    Expr *callee;
+    const Token *bracket;
+    Expr *index;
+
+    IndexedCallExpr(Expr *callee, const Token *bracket, Expr *index): callee(callee), bracket(bracket),
+                                                                      index(index) {
+    }
+
+    ~IndexedCallExpr() override {
+        delete callee;
+        delete index;
+    }
+};
+
+class ArrayExpr final : public Expr {
+public:
+    Token *bracket;
+    std::vector<Expr *> *elements;
+
+    ArrayExpr(Token *bracket, std::vector<Expr *> *elements): bracket(bracket), elements(elements) {
+    }
+
+    ~ArrayExpr() override {
+        for (const auto &element: *elements) {
+            delete element;
+        }
+        delete elements;
+    }
+};
+
+class ArrayElementAssignExpr final : public Expr {
+public:
+    Expr *callee;
+    Expr *index;
+    Expr *value;
+    const Token *bracket;
+
+    ArrayElementAssignExpr(Expr *callee, Expr *index, Expr *value, const Token *bracket): callee(callee), index(index),
+        value(value), bracket(bracket) {
+    }
+
+    ~ArrayElementAssignExpr() override {
+        delete callee;
+        delete index;
+    }
+};
+
 template<class R>
 class ExprVisitor {
 public:
@@ -180,6 +229,15 @@ public:
         if (const auto lg = dynamic_cast<LogicalExpr *>(expr)) {
             return visitLogicalExpr(lg);
         }
+        if (const auto arr = dynamic_cast<ArrayExpr *>(expr)) {
+            return visitArrayExpr(arr);
+        }
+        if (const auto index = dynamic_cast<IndexedCallExpr *>(expr)) {
+            return visitIndexedCallExpr(index);
+        }
+        if (const auto aeae = dynamic_cast<ArrayElementAssignExpr *>(expr)) {
+            return visitArrayEleAssignExpr(aeae);
+        }
         // This should not happen.
         throw std::runtime_error("Unknown expr type");
     }
@@ -202,6 +260,12 @@ protected:
     virtual R visitLogicalExpr(LogicalExpr *expr) = 0;
 
     virtual R visitCallExpr(CallExpr *expr) = 0;
+
+    virtual R visitArrayExpr(ArrayExpr *expr) = 0;
+
+    virtual R visitIndexedCallExpr(IndexedCallExpr *expr) = 0;
+
+    virtual R visitArrayEleAssignExpr(ArrayElementAssignExpr *expr) = 0;
 };
 
 #endif //EXPR_HPP

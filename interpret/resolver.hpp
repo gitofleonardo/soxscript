@@ -57,6 +57,10 @@ protected:
 
     void visitCallExpr(CallExpr *expr) override;
 
+    void visitArrayExpr(ArrayExpr *expr) override;
+
+    void visitIndexedCallExpr(IndexedCallExpr *expr) override;
+
     void visitExprStmt(ExprStmt *stmt) override;
 
     void visitVarStmt(VarStmt *stmt) override;
@@ -70,6 +74,8 @@ protected:
     void visitFunctionStmt(FunctionStmt *stmt) override;
 
     void visitReturnStmt(ReturnStmt *stmt) override;
+
+    void visitArrayEleAssignExpr(ArrayElementAssignExpr *expr) override;
 
 public:
     explicit Resolver(Interpreter *interpreter);

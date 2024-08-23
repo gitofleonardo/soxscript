@@ -20,9 +20,21 @@ fun main(a, b) {
     println("hello " + a + ", " + b);
 }
 
+var sox = "owali";
 main("Sox", "fun");
 main();
 println("");
 main("Leo", "fun");
 println("");
 println("hello world");
+
+var arr = [1, "fun", "sox", 1.5, sox];
+arr[1] = "no fun";
+for (var i = 0; i < length(arr); i = i + 1) {
+    println(arr[i]);
+}
+
+var arr1 = ["hello", "sox"];
+for (var i = 0; i < length(arr1); i = i + 1) {
+    println(arr1[i]);
+}

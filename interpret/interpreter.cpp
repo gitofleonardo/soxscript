@@ -346,7 +346,7 @@ std::shared_ptr<ValueHolder> Interpreter::visitCallExpr(CallExpr *expr) {
     const auto paramSize = expr->arguments->size();
     Callable *callable = nullptr;
     if (const auto holder = dynamic_cast<CallableHolder *>(callee.get())) {
-        for (const auto& c : holder->callables) {
+        for (const auto &c: holder->callables) {
             if (paramSize == c->parameterSize()) {
                 callable = c.get();
                 break;
@@ -382,4 +382,42 @@ void Interpreter::executeBlock(std::vector<Stmt *> *stmts, std::shared_ptr<Runti
 
 void Interpreter::resolve(const int depth, Expr *expr) {
     _scopesTable[expr] = depth;
+}
+
+std::shared_ptr<ValueHolder> Interpreter::visitArrayExpr(ArrayExpr *expr) {
+    const auto arrayHolder = std::make_shared<ArrayValueHolder>();
+    for (const auto element: *expr->elements) {
+        arrayHolder->values.push_back(evaluate(element));
+    }
+    return arrayHolder;
+}
+
+std::shared_ptr<ValueHolder> Interpreter::visitIndexedCallExpr(IndexedCallExpr *expr) {
+    const auto callee = evaluate(expr->callee);
+    const auto arrayHolder = dynamic_cast<ArrayValueHolder *>(callee.get());
+    if (!arrayHolder) {
+        throw RuntimeError(expr->bracket, "Not an array");
+    }
+    const auto index = evaluate(expr->index);
+    const auto indexHolder = dynamic_cast<IntegerValueHolder *>(index.get());
+    if (!indexHolder) {
+        throw RuntimeError(expr->bracket, "Array index not an integer");
+    }
+    return arrayHolder->values[indexHolder->value];
+}
+
+std::shared_ptr<ValueHolder> Interpreter::visitArrayEleAssignExpr(ArrayElementAssignExpr *expr) {
+    const auto arr = evaluate(expr->callee);
+    const auto arrHolder = dynamic_cast<ArrayValueHolder *>(arr.get());
+    if (!arrHolder) {
+        throw RuntimeError(expr->bracket, "Expression not an array");
+    }
+    const auto index = evaluate(expr->index);
+    const auto indexHolder = dynamic_cast<IntegerValueHolder *>(index.get());
+    if (!indexHolder) {
+        throw RuntimeError(expr->bracket, "Array index not an integer");
+    }
+    const auto value = evaluate(expr->value);
+    arrHolder->values[indexHolder->value] = value;
+    return value;
 }

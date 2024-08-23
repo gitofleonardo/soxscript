@@ -56,6 +56,10 @@ void Lexer::scanToken() {
         addToken(STAR);
     } else if (c == '?') {
         addToken(QUESTION_MARK);
+    } else if (c == '[') {
+        addToken(L_BRACKET);
+    } else if (c == ']') {
+        addToken(R_BRACKET);
     } else if (c == '!') {
         addToken(match('=') ? BANG_EQUAL : BANG);
     } else if (c == '=') {

@@ -163,3 +163,20 @@ void Resolver::declare(const Token *name) const {
     }
     top[*name->lexeme()] = false;
 }
+
+void Resolver::visitArrayExpr(ArrayExpr *expr) {
+    for (const auto element: *expr->elements) {
+        resolve(element);
+    }
+}
+
+void Resolver::visitIndexedCallExpr(IndexedCallExpr *expr) {
+    resolve(expr->callee);
+    resolve(expr->index);
+}
+
+void Resolver::visitArrayEleAssignExpr(ArrayElementAssignExpr *expr) {
+    resolve(expr->callee);
+    resolve(expr->index);
+}
+

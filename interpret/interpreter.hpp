@@ -75,6 +75,11 @@ protected:
 
     std::shared_ptr<ValueHolder> visitCallExpr(CallExpr *expr) override;
 
+    std::shared_ptr<ValueHolder> visitArrayExpr(ArrayExpr *expr) override;
+
+    std::shared_ptr<ValueHolder> visitIndexedCallExpr(IndexedCallExpr *expr) override;
+
+    std::shared_ptr<ValueHolder> visitArrayEleAssignExpr(ArrayElementAssignExpr *expr) override;
 public:
     void executeBlock(std::vector<Stmt *> *stmts, std::shared_ptr<RuntimeScope> scope);
     std::shared_ptr<ValueHolder> evaluate(Expr *expr) const;

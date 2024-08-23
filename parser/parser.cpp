@@ -181,9 +181,12 @@ Expr *Parser::assignment() {
     if (match(EQUAL)) {
         const auto equals = previous();
         const auto rvalue = assignment();
-        if (const auto v = dynamic_cast<VariableExpr *>(expr); v != nullptr) {
+        if (const auto v = dynamic_cast<VariableExpr *>(expr)) {
             const auto name = v->name;
             return new AssignExpr(rvalue, name);
+        }
+        if (const auto indexedCall = dynamic_cast<IndexedCallExpr *>(expr)) {
+            return new ArrayElementAssignExpr(indexedCall->callee, indexedCall->index, rvalue, indexedCall->bracket);
         }
         error(equals, "Invalid assign rvalue");
     }
@@ -277,6 +280,8 @@ Expr *Parser::callExpression() {
     while (true) {
         if (match(L_PAREN)) {
             expr = finishCallExpr(expr);
+        } else if (match(L_BRACKET)) {
+            expr = finishIndexedCallExpr(expr);
         } else {
             break;
         }
@@ -291,10 +296,15 @@ Expr *Parser::finishCallExpr(Expr *callee) {
             args->push_back(expression());
         } while (match(COMMA));
     }
-    auto paren = consume(R_PAREN, "Expect '(' after parameters");
+    const auto paren = consume(R_PAREN, "Expect '(' after parameters");
     return new CallExpr(callee, paren, args);
 }
 
+Expr *Parser::finishIndexedCallExpr(Expr *callee) {
+    const auto index = expression();
+    const auto bracket = consume(R_BRACKET, "Expect '[' after array index");
+    return new IndexedCallExpr(callee, bracket, index);
+}
 
 Expr *Parser::primaryExpression() {
     Expr *expr = nullptr;
@@ -306,6 +316,18 @@ Expr *Parser::primaryExpression() {
         expr = new GroupingExpr(grouping);
     } else if (match(IDENTIFIER)) {
         expr = new VariableExpr(previous());
+    } else if (match(L_BRACKET)) {
+        Token *bracket = previous();
+        const auto elements = new std::vector<Expr *>();
+        const auto arr = new ArrayExpr(bracket, elements);
+        if (match(R_BRACKET)) { // Empty array
+        } else {
+            do {
+                elements->push_back(expression());
+            } while (match(COMMA));
+            consume(R_BRACKET, "Missing ']'");
+        }
+        expr = arr;
     } else {
         error(peek(), "Expect expression");
     }

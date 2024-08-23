@@ -35,6 +35,8 @@ class Parser {
 
     Expr *finishCallExpr(Expr *callee);
 
+    Expr *finishIndexedCallExpr(Expr *callee);
+
 public:
     explicit Parser(const Lexer *lexer);
 
