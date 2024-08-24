@@ -47,11 +47,13 @@ public:
     std::shared_ptr<ValueHolder>
     call(Interpreter *interpreter, const std::vector<std::shared_ptr<ValueHolder> > &args) override {
         const auto &holder = args.at(0);
-        const auto arrHolder = dynamic_cast<ArrayValueHolder *>(holder.get());
-        if (!arrHolder) {
-            throw RuntimeError("Not an array");
+        if (const auto arrHolder = dynamic_cast<ArrayValueHolder *>(holder.get())) {
+            return std::make_shared<IntegerValueHolder>(arrHolder->values.size());
         }
-        return std::make_shared<IntegerValueHolder>(arrHolder->values.size());
+        if (const auto map = dynamic_cast<MapValueHolder *>(holder.get())) {
+            return std::make_shared<IntegerValueHolder>(map->values.size());
+        }
+        throw RuntimeError("Not an array or a map");
     }
 
     int parameterSize() override {

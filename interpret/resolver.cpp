@@ -175,8 +175,14 @@ void Resolver::visitIndexedCallExpr(IndexedCallExpr *expr) {
     resolve(expr->index);
 }
 
-void Resolver::visitArrayEleAssignExpr(ArrayElementAssignExpr *expr) {
+void Resolver::visitIndexedEleAssignExpr(ArrayElementAssignExpr *expr) {
     resolve(expr->callee);
     resolve(expr->index);
 }
 
+void Resolver::visitMapExpr(MapExpr *expr) {
+    for (const auto [fst, snd]: *expr->elements) {
+        resolve(fst);
+        resolve(snd);
+    }
+}

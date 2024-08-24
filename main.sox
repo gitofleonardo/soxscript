@@ -38,3 +38,19 @@ var arr1 = ["hello", "sox"];
 for (var i = 0; i < length(arr1); i = i + 1) {
     println(arr1[i]);
 }
+
+var map1 = {"key123": 1, "key2": "value2", 3: "value3"};
+println(map1["key2"]);
+println(map1["key123"]);
+println(map1[3]);
+
+map1["hello"] = "world";
+
+println(map1["hello"]);
+
+map1[true] = "true";
+map1[1231] = "false";
+println(map1[true]);
+map1[true] = "false";
+println(map1[true]);
+println(length(map1));

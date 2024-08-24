@@ -196,6 +196,23 @@ public:
     }
 };
 
+class MapExpr final : public Expr {
+public:
+    Token *brace;
+    std::vector<std::pair<Expr *, Expr *> > *elements;
+
+    MapExpr(Token *brace, std::vector<std::pair<Expr *, Expr *> > *elements): brace(brace), elements(elements) {
+    }
+
+    ~MapExpr() override {
+        for (const auto &element: *elements) {
+            delete element.first;
+            delete element.second;
+        }
+        delete elements;
+    }
+};
+
 template<class R>
 class ExprVisitor {
 public:
@@ -236,7 +253,10 @@ public:
             return visitIndexedCallExpr(index);
         }
         if (const auto aeae = dynamic_cast<ArrayElementAssignExpr *>(expr)) {
-            return visitArrayEleAssignExpr(aeae);
+            return visitIndexedEleAssignExpr(aeae);
+        }
+        if (const auto mapExpr = dynamic_cast<MapExpr *>(expr)) {
+            return visitMapExpr(mapExpr);
         }
         // This should not happen.
         throw std::runtime_error("Unknown expr type");
@@ -265,7 +285,9 @@ protected:
 
     virtual R visitIndexedCallExpr(IndexedCallExpr *expr) = 0;
 
-    virtual R visitArrayEleAssignExpr(ArrayElementAssignExpr *expr) = 0;
+    virtual R visitIndexedEleAssignExpr(ArrayElementAssignExpr *expr) = 0;
+
+    virtual R visitMapExpr(MapExpr *expr) = 0;
 };
 
 #endif //EXPR_HPP

@@ -46,7 +46,7 @@ unary               ->  <unary_symbol><unary>|<call>
 unary_symbol        ->  BANG|MINUS|PLUS
 
 call                ->  <primary><call_tail>
-primary             ->  NUMBER|STRING|TRUE|FALSE|NIL|L_PAREN<expr>R_PAREN|IDENTIFIER|<array>
+primary             ->  NUMBER|STRING|TRUE|FALSE|NIL|L_PAREN<expr>R_PAREN|IDENTIFIER|<array>|<map>
 call_tail           ->  <call_type><call_tail>|^
 call_type           ->  <method_call>|<indexed_call>
 method_call         ->  L_PAREN<args>R_PAREN
@@ -59,3 +59,7 @@ array_content       ->  <expr><array_content_tail>|^
 array_content_tail  ->  COMMA<expr>|^
 
 indexed_call        ->  L_BRACKET<expr>R_BRACKET
+
+map                 ->  L_BRACE<map_entries>R_BRACE
+map_entries         ->  <expr>COLON<expr><map_entries_tail>|^
+map_entries_tail    ->  COMMA<map_entries>|^

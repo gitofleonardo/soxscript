@@ -320,7 +320,8 @@ Expr *Parser::primaryExpression() {
         Token *bracket = previous();
         const auto elements = new std::vector<Expr *>();
         const auto arr = new ArrayExpr(bracket, elements);
-        if (match(R_BRACKET)) { // Empty array
+        if (match(R_BRACKET)) {
+            // Empty array
         } else {
             do {
                 elements->push_back(expression());
@@ -328,6 +329,22 @@ Expr *Parser::primaryExpression() {
             consume(R_BRACKET, "Missing ']'");
         }
         expr = arr;
+    } else if (match(L_BRACE)) {
+        Token *brace = previous();
+        const auto elements = new std::vector<std::pair<Expr *, Expr *> >();
+        const auto map = new MapExpr(brace, elements);
+        if (match(R_BRACE)) {
+            // Empty map
+        } else {
+            do {
+                const auto key = expression();
+                consume(COLON, "Missing ':'");
+                const auto value = expression();
+                elements->push_back(std::make_pair(key, value));
+            } while (match(COMMA));
+            consume(R_BRACE, "Missing '}'");
+        }
+        expr = map;
     } else {
         error(peek(), "Expect expression");
     }

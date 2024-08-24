@@ -75,7 +75,9 @@ protected:
 
     void visitReturnStmt(ReturnStmt *stmt) override;
 
-    void visitArrayEleAssignExpr(ArrayElementAssignExpr *expr) override;
+    void visitIndexedEleAssignExpr(ArrayElementAssignExpr *expr) override;
+
+    void visitMapExpr(MapExpr *expr) override;
 
 public:
     explicit Resolver(Interpreter *interpreter);

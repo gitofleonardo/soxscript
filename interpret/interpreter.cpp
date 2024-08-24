@@ -394,30 +394,51 @@ std::shared_ptr<ValueHolder> Interpreter::visitArrayExpr(ArrayExpr *expr) {
 
 std::shared_ptr<ValueHolder> Interpreter::visitIndexedCallExpr(IndexedCallExpr *expr) {
     const auto callee = evaluate(expr->callee);
-    const auto arrayHolder = dynamic_cast<ArrayValueHolder *>(callee.get());
-    if (!arrayHolder) {
-        throw RuntimeError(expr->bracket, "Not an array");
+    if (const auto arrayHolder = dynamic_cast<ArrayValueHolder *>(callee.get())) {
+        const auto index = evaluate(expr->index);
+        const auto indexHolder = dynamic_cast<IntegerValueHolder *>(index.get());
+        if (!indexHolder) {
+            throw RuntimeError(expr->bracket, "Array index not an integer");
+        }
+        return arrayHolder->values[indexHolder->value];
     }
-    const auto index = evaluate(expr->index);
-    const auto indexHolder = dynamic_cast<IntegerValueHolder *>(index.get());
-    if (!indexHolder) {
-        throw RuntimeError(expr->bracket, "Array index not an integer");
+    if (const auto mapHolder = dynamic_cast<MapValueHolder *>(callee.get())) {
+        const auto key = evaluate(expr->index);
+        if (!mapHolder->values.contains(key)) {
+            throw RuntimeError(expr->bracket, "Key not found");
+        }
+        return mapHolder->values[key];
     }
-    return arrayHolder->values[indexHolder->value];
+    throw RuntimeError(expr->bracket, "Not an array");
 }
 
-std::shared_ptr<ValueHolder> Interpreter::visitArrayEleAssignExpr(ArrayElementAssignExpr *expr) {
+std::shared_ptr<ValueHolder> Interpreter::visitIndexedEleAssignExpr(ArrayElementAssignExpr *expr) {
     const auto arr = evaluate(expr->callee);
-    const auto arrHolder = dynamic_cast<ArrayValueHolder *>(arr.get());
-    if (!arrHolder) {
-        throw RuntimeError(expr->bracket, "Expression not an array");
+    if (const auto arrHolder = dynamic_cast<ArrayValueHolder *>(arr.get())) {
+        const auto index = evaluate(expr->index);
+        const auto indexHolder = dynamic_cast<IntegerValueHolder *>(index.get());
+        if (!indexHolder) {
+            throw RuntimeError(expr->bracket, "Array index not an integer");
+        }
+        const auto value = evaluate(expr->value);
+        arrHolder->values[indexHolder->value] = value;
+        return value;
     }
-    const auto index = evaluate(expr->index);
-    const auto indexHolder = dynamic_cast<IntegerValueHolder *>(index.get());
-    if (!indexHolder) {
-        throw RuntimeError(expr->bracket, "Array index not an integer");
+    if (const auto mapHolder = dynamic_cast<MapValueHolder *>(arr.get())) {
+        const auto key = evaluate(expr->index);
+        const auto value = evaluate(expr->value);
+        mapHolder->values[key] = value;
+        return value;
     }
-    const auto value = evaluate(expr->value);
-    arrHolder->values[indexHolder->value] = value;
-    return value;
+    throw RuntimeError(expr->bracket, "Expression not an array or a map");
+}
+
+std::shared_ptr<ValueHolder> Interpreter::visitMapExpr(MapExpr *expr) {
+    const auto mapHolder = std::make_shared<MapValueHolder>();
+    for (const auto [k, v]: *expr->elements) {
+        const auto keyVal = evaluate(k);
+        const auto valueVal = evaluate(v);
+        mapHolder->values[keyVal] = valueVal;
+    }
+    return mapHolder;
 }
