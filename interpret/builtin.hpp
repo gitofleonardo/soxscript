@@ -49,7 +49,7 @@ public:
         const auto &holder = args.at(0);
         const auto arrHolder = dynamic_cast<ArrayValueHolder *>(holder.get());
         if (!arrHolder) {
-            throw RuntimeError();
+            throw RuntimeError("Not an array");
         }
         return std::make_shared<IntegerValueHolder>(arrHolder->values.size());
     }

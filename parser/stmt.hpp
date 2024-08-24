@@ -149,7 +149,7 @@ public:
             return visitReturnStmt(r);
         }
         // This should not happen
-        throw RuntimeError();
+        throw RuntimeError("This shouldn't happen");
     }
 
     virtual ~StmtVisitor() = default;

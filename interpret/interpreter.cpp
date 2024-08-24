@@ -29,7 +29,7 @@ bool Interpreter::checkNumberOperand(Token *op, const std::initializer_list<std:
         if (const auto integer = dynamic_cast<IntegerValueHolder *>(operand.get()); integer != nullptr) {
             continue;
         }
-        throw RuntimeError();
+        throw RuntimeError(op, "Invalid operand type");
     }
     return true;
 }
@@ -178,7 +178,7 @@ std::shared_ptr<ValueHolder> Interpreter::visitBinaryExpr(BinaryExpr *expr) {
             break;
         }
         default: {
-            throw RuntimeError();
+            throw RuntimeError(expr->op, "Invalid operand type");
         }
     }
     return result;
@@ -198,7 +198,7 @@ double Interpreter::asDouble(const std::shared_ptr<ValueHolder> &value) {
     if (const auto integer = dynamic_cast<IntegerValueHolder *>(value.get()); integer != nullptr) {
         return integer->value;
     }
-    throw RuntimeError();
+    throw RuntimeError("Invalid operand");
 }
 
 int Interpreter::asInt(const std::shared_ptr<ValueHolder> &value) {
@@ -222,7 +222,7 @@ std::string Interpreter::asString(const std::shared_ptr<ValueHolder> &value) {
     if (const auto doubleValue = dynamic_cast<DoubleValueHolder *>(value.get()); doubleValue != nullptr) {
         return std::to_string(doubleValue->value);
     }
-    throw RuntimeError();
+    throw RuntimeError("Invalid operand");
 }
 
 std::shared_ptr<ValueHolder> Interpreter::visitGroupingExpr(GroupingExpr *expr) {
@@ -255,7 +255,7 @@ std::shared_ptr<ValueHolder> Interpreter::visitLiteralExpr(LiteralExpr *expr) {
             break;
         }
         default: {
-            throw RuntimeError();
+            throw RuntimeError("Invalid literal");
         }
     }
     return result;
@@ -284,7 +284,7 @@ std::shared_ptr<ValueHolder> Interpreter::visitUnaryExpr(UnaryExpr *expr) {
             return right;
         }
         default: {
-            throw RuntimeError();
+            throw RuntimeError(expr->op, "Invalid operand");
         }
     }
     // Unreachable
@@ -353,10 +353,10 @@ std::shared_ptr<ValueHolder> Interpreter::visitCallExpr(CallExpr *expr) {
             }
         }
         if (callable == nullptr) {
-            throw RuntimeError();
+            throw RuntimeError(expr->paren, "No callable found");
         }
     } else {
-        throw RuntimeError();
+        throw RuntimeError(expr->paren, "No callable found");
     }
     std::vector<std::shared_ptr<ValueHolder> > realArgs;
     for (const auto argument: *expr->arguments) {

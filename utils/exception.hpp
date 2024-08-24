@@ -21,7 +21,8 @@ public:
     RuntimeError(const Token *token, std::string message): _token(token), _message(std::move(message)) {
     }
 
-    RuntimeError() = default;
+    explicit RuntimeError(std::string message): _message(std::move(message)) {
+    }
 };
 
 class ReturnValue final : public std::exception {
