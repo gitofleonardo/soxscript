@@ -55,7 +55,11 @@ Interpreter::~Interpreter() = default;
 
 void Interpreter::interpret(std::vector<Stmt *> *stmts) const {
     for (const auto stmt: *stmts) {
-        execute(stmt);
+        try {
+            execute(stmt);
+        } catch (const RuntimeError &e) {
+            Logger::instance()->logRuntimeError(e._token->line(), e._message);
+        }
     }
 }
 
