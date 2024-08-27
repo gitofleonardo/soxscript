@@ -8,7 +8,8 @@ var_declaration         ->  VAR IDENTIFIER<declare_stmt_tail>SEMICOLON
 declare_statement_tail  ->  EQUAL<expr>|^
 
 fun_declaration         ->  FUN IDENTIFIER L_PAREN<parameters>R_PAREN<block>
-parameters              ->  IDENTIFIER<parameters_tail>
+parameters              ->  <identifier_modifier>IDENTIFIER<parameters_tail>
+identifier_modifier     ->  VARARGS|^
 parameters_tail         ->  COMMA<parameters_tail>|^
 
 expr_statement          ->  <expr>SEMICOLON

@@ -25,6 +25,7 @@ class SoxKeywords {
         _keywords.insert(std::make_pair("true", TRUE));
         _keywords.insert(std::make_pair("var", VAR));
         _keywords.insert(std::make_pair("while", WHILE));
+        _keywords.insert(std::make_pair("varargs", VARARGS));
     }
 
 public:

@@ -134,11 +134,23 @@ Stmt *Parser::declarationStatement() {
 Stmt *Parser::functionDeclarationStatement() {
     const auto name = consume(IDENTIFIER, "Expected a function name");
     consume(L_PAREN, "Expect '(' after identifier");
-    const auto params = new std::vector<Token *>();
+    const auto params = new std::vector<FunctionParam *>();
     if (!check(R_PAREN)) {
+        ulong varargsIndex = -1;
         do {
-            params->push_back(consume(IDENTIFIER, "Expect a parameter name"));
+            bool isVarargs = false;
+            if (match(VARARGS)) {
+                isVarargs = true;
+            }
+            const auto identifier = consume(IDENTIFIER, "Expect a parameter name");
+            params->push_back(new FunctionParam(identifier, isVarargs));
+            if (isVarargs && varargsIndex == -1) {
+                varargsIndex = params->size() - 1;
+            }
         } while (match(COMMA));
+        if (varargsIndex != -1 && varargsIndex != params->size() - 1) {
+            error(peek(), "Varargs variable should be the last parameter");
+        }
     }
     consume(R_PAREN, "Expect ')' after parameters");
     consume(L_BRACE, "Expect '{' on function declaration");
@@ -221,7 +233,7 @@ Expr *Parser::ternaryExpression() {
             error(peek(), "Missing token ':'");
         }
         const auto rvalue = equalityExpression();
-        expr = new TernaryExpr(expr, lvalue, rvalue);
+        expr = new TernaryExpr(lvalue, rvalue, expr);
     }
     return expr;
 }

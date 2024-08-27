@@ -54,3 +54,15 @@ println(map1[true]);
 map1[true] = "false";
 println(map1[true]);
 println(length(map1));
+
+fun varargsFunc1(a, b, varargs c) {
+    print("a = " + a + ", b = " + b + ", and c = [");
+    var length = length(c);
+    for (var i = 0; i < length; i = i + 1) {
+        print(c[i] + (i == length - 1 ? "" : ","));
+    }
+    println("]");
+}
+
+varargsFunc1("hello", "sox");
+varargsFunc1("hello", "sox", "and", "ukii");

@@ -356,6 +356,15 @@ std::shared_ptr<ValueHolder> Interpreter::visitCallExpr(CallExpr *expr) {
                 break;
             }
         }
+        // No matching function with exact parameter size
+        // So let's find a varargs function
+        for (const auto &c: holder->callables) {
+            if (const auto varargFunc = dynamic_cast<FunctionCallable *>(c.get());
+                varargFunc != nullptr && varargFunc->isVarargs && paramSize >= varargFunc->parameterSize() - 1) {
+                callable = c.get();
+                break;
+            }
+        }
         if (callable == nullptr) {
             throw RuntimeError(expr->paren, "No callable found");
         }

@@ -94,13 +94,22 @@ public:
     }
 };
 
+class FunctionParam final {
+public:
+    Token *name;
+    const bool isVararg = false;
+
+    FunctionParam(Token *name, const bool isVararg) : name(name), isVararg(isVararg) {
+    }
+};
+
 class FunctionStmt final : public Stmt {
 public:
     Token *name;
-    std::vector<Token *> *params;
+    std::vector<FunctionParam *> *params;
     BlockStmt *bodyBlock;
 
-    FunctionStmt(Token *name, std::vector<Token *> *params, BlockStmt *block): name(name), params(params),
+    FunctionStmt(Token *name, std::vector<FunctionParam *> *params, BlockStmt *block): name(name), params(params),
         bodyBlock(block) {
     }
 

@@ -121,8 +121,8 @@ void Resolver::resolveFunction(const FunctionStmt *func) {
     _block_type = FUNCTION;
     beginScope();
     for (const auto param: *func->params) {
-        declare(param);
-        define(param);
+        declare(param->name);
+        define(param->name);
     }
     resolve(func->bodyBlock->stmts);
     endScope();
