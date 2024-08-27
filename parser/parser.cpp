@@ -284,7 +284,25 @@ Expr *Parser::unaryExpression() {
         const auto rvalue = unaryExpression();
         return new UnaryExpr(rvalue, op);
     }
-    return callExpression();
+    return prefixAutoExpression();
+}
+
+Expr *Parser::prefixAutoExpression() {
+    if (match({PLUS_PLUS, MINUS_MINUS})) {
+        const auto op = previous();
+        const auto rvalue = prefixAutoExpression();
+        return new PrefixAutoUnaryExpr(rvalue, op);
+    }
+    return suffixAutoExpression();
+}
+
+Expr *Parser::suffixAutoExpression() {
+    auto expr = callExpression();
+    while (match({PLUS_PLUS, MINUS_MINUS})) {
+        const auto op = previous();
+        expr = new SuffixAutoUnaryExpr(expr, op);
+    }
+    return expr;
 }
 
 Expr *Parser::callExpression() {

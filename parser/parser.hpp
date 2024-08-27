@@ -87,6 +87,10 @@ public:
     [[nodiscard]] Expr *callExpression();
 
     [[nodiscard]] Expr *primaryExpression();
+
+    [[nodiscard]] Expr *prefixAutoExpression();
+
+    [[nodiscard]] Expr *suffixAutoExpression();
 };
 
 #endif //PARSER_HPP

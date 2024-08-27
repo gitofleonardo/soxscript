@@ -186,3 +186,11 @@ void Resolver::visitMapExpr(MapExpr *expr) {
         resolve(snd);
     }
 }
+
+void Resolver::visitPrefixAutoUnaryExpr(PrefixAutoUnaryExpr *expr) {
+    resolve(expr->expr);
+}
+
+void Resolver::visitSuffixAutoUnaryExpr(SuffixAutoUnaryExpr *expr) {
+    resolve(expr->expr);
+}

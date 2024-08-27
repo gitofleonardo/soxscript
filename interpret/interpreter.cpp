@@ -270,10 +270,7 @@ std::shared_ptr<ValueHolder> Interpreter::visitUnaryExpr(UnaryExpr *expr) {
     switch (expr->op->type()) {
         case PLUS: {
             checkNumberOperand(expr->op, {right});
-            if (isDouble(right)) {
-                return right;
-            }
-            break;
+            return right;
         }
         case MINUS: {
             checkNumberOperand(expr->op, {right});
@@ -454,4 +451,60 @@ std::shared_ptr<ValueHolder> Interpreter::visitMapExpr(MapExpr *expr) {
         mapHolder->values[keyVal] = valueVal;
     }
     return mapHolder;
+}
+
+std::shared_ptr<ValueHolder> Interpreter::visitPrefixAutoUnaryExpr(PrefixAutoUnaryExpr *expr) {
+    auto rvalue = evaluate(expr->expr);
+    checkNumberOperand(expr->op, {rvalue});
+    if (isDouble(rvalue)) {
+        double val = asDouble(rvalue);
+        switch (expr->op->type()) {
+            case PLUS_PLUS: ++val;
+                break;
+            case MINUS_MINUS: --val;
+                break;
+            default: throw RuntimeError(expr->op, "Unsupported type");
+        }
+        dynamic_cast<DoubleValueHolder *>(rvalue.get())->value = val;
+        return rvalue;
+    }
+    int val = asInt(rvalue);
+    switch (expr->op->type()) {
+        case PLUS_PLUS: ++val;
+            break;
+        case MINUS_MINUS: --val;
+            break;
+        default: throw RuntimeError(expr->op, "Unsupported type");
+    }
+    dynamic_cast<IntegerValueHolder *>(rvalue.get())->value = val;
+    return rvalue;
+}
+
+std::shared_ptr<ValueHolder> Interpreter::visitSuffixAutoUnaryExpr(SuffixAutoUnaryExpr *expr) {
+    auto rvalue = evaluate(expr->expr);
+    checkNumberOperand(expr->op, {rvalue});
+    if (isDouble(rvalue)) {
+        double val = asDouble(rvalue);
+        double oldVal = val;
+        switch (expr->op->type()) {
+            case PLUS_PLUS: ++val;
+                break;
+            case MINUS_MINUS: --val;
+                break;
+            default: throw RuntimeError(expr->op, "Unsupported type");
+        }
+        dynamic_cast<DoubleValueHolder *>(rvalue.get())->value = val;
+        return std::make_shared<DoubleValueHolder>(oldVal);
+    }
+    int val = asInt(rvalue);
+    int oldVal = val;
+    switch (expr->op->type()) {
+        case PLUS_PLUS: ++val;
+            break;
+        case MINUS_MINUS: --val;
+            break;
+        default: throw RuntimeError(expr->op, "Unsupported type");
+    }
+    dynamic_cast<IntegerValueHolder *>(rvalue.get())->value = val;
+    return std::make_shared<IntegerValueHolder>(oldVal);
 }

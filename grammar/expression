@@ -1,65 +1,71 @@
 ## Expr (priority not included)
 
-expr                ->  <literal>|<unary>|<binary>|<grouping>
+expr                    ->  <literal>|<unary>|<binary>|<grouping>
 
-literal             ->  NUMBER|STRING|TRUE|FALSE|NIL
-grouping            ->  L_PAREN <expr> R_PAREN
+literal                 ->  NUMBER|STRING|TRUE|FALSE|NIL
+grouping                ->  L_PAREN <expr> R_PAREN
 
-unary               ->  MINUS <expr>|BANG <expr>
-unary               ->  <unary_head><expr>
-unary_head          ->  MINUS|BANG
+unary                   ->  MINUS <expr>|BANG <expr>
+unary                   ->  <unary_head><expr>
+unary_head              ->  MINUS|BANG
 
-binary              ->  <expr><operator><expr>
-operator            ->  EQUAL_EQUAL|BANG_EQUAL|LESS|LESS_EQUAL|GREATER|GREATER_EQUAL|PLUS|MINUS|STAR|SLASH
+binary                  ->  <expr><operator><expr>
+operator                ->  EQUAL_EQUAL|BANG_EQUAL|LESS|LESS_EQUAL|GREATER|GREATER_EQUAL|PLUS|MINUS|STAR|SLASH
 
 ## Expr (priority included)
 
-expr                ->  <assignment>
+expr                    ->  <assignment>
 
-assignment          ->  <assignment_head>EQUAL<assignment>|<logic_or>
-assignment_head     ->  IDENTIFIER<assign_tail>
-assign_tail         ->  <indexed_call><assign_tail>|^
+assignment              ->  <assignment_head>EQUAL<assignment>|<logic_or>
+assignment_head         ->  IDENTIFIER<assign_tail>
+assign_tail             ->  <indexed_call><assign_tail>|^
 
-logic_or            ->  <logic_and><logic_or_tail>
-logic_or_tail       ->  OR<logic_and><logic_or>|^
-logic_and           ->  <ternary><logic_and_tail>
-logic_and_tail      ->  AND<ternary><logic_and_tail>|^
+logic_or                ->  <logic_and><logic_or_tail>
+logic_or_tail           ->  OR<logic_and><logic_or>|^
+logic_and               ->  <ternary><logic_and_tail>
+logic_and_tail          ->  AND<ternary><logic_and_tail>|^
 
-ternary             ->  <equality><equality_tail>
-equality_tail       ->  QUESTION_MARK<equality>COLON<equality><equality_tail>|^
+ternary                 ->  <equality><equality_tail>
+equality_tail           ->  QUESTION_MARK<equality>COLON<equality><equality_tail>|^
 
-equality            ->  <comparison><comparison_tail>
-comparison          ->  <term><term_tail>
-comparison_tail     ->  <equal_symbol><comparison><comparison_tail>|^
-equal_symbol        ->  EQUAL_EQUAL|BANG_EQUAL
-term_tail           ->  <comp_symbol><term><term_tail>|^
-comp_tail           ->  GREATER|GREATER_EQUAL|LESS|LESS_EQUAL
+equality                ->  <comparison><comparison_tail>
+comparison              ->  <term><term_tail>
+comparison_tail         ->  <equal_symbol><comparison><comparison_tail>|^
+equal_symbol            ->  EQUAL_EQUAL|BANG_EQUAL
+term_tail               ->  <comp_symbol><term><term_tail>|^
+comp_tail               ->  GREATER|GREATER_EQUAL|LESS|LESS_EQUAL
 
-term                ->  <factor><factor_tail>
-factor              ->  <unary><unary_tail>
-factor_tail         ->  <plus_sub><factor><factor_tail>|^
-plus_sub            ->  PLUS|MINUS
-unary_tail          ->  <div_mul><unary><unary_tail>|^
-div_mul             ->  SLASH|STAR
+term                    ->  <factor><factor_tail>
+factor                  ->  <single_unary><single_unary_tail>
+factor_tail             ->  <plus_sub><factor><factor_tail>|^
+plus_sub                ->  PLUS|MINUS
+single_unary_tail       ->  <div_mul><single_unary><single_unary_tail>|^
+div_mul                 ->  SLASH|STAR
 
-unary               ->  <unary_symbol><unary>|<call>
-unary_symbol        ->  BANG|MINUS|PLUS
+single_unary            ->  <single_unary_symbol><single_unary>|<prefix_auto_unary>
+single_unary_symbol     ->  BANG|MINUS|PLUS
 
-call                ->  <primary><call_tail>
-primary             ->  NUMBER|STRING|TRUE|FALSE|NIL|L_PAREN<expr>R_PAREN|IDENTIFIER|<array>|<map>
-call_tail           ->  <call_type><call_tail>|^
-call_type           ->  <method_call>|<indexed_call>
-method_call         ->  L_PAREN<args>R_PAREN
-args                ->  <expr><args_tail>|^
-args_tail           ->  COMMA<expr>|^
-args_tail           ->  COMMA<expr>|^
+prefix_auto_unary       ->  <auto_unary_symbol><prefix_auto_unary>|<suffix_auto_unary>
+auto_unary_symbol       ->  PLUS_PLUS|MINUS_MINUS
 
-array               ->  L_BRACKET<array_content>R_BRACKET
-array_content       ->  <expr><array_content_tail>|^
-array_content_tail  ->  COMMA<expr>|^
+suffix_auto_unary       ->  <call><suffix_auto_unary_tail>
+suffix_auto_unary_tail  ->  <suffix_auto_unary><auto_unary_symbol>
 
-indexed_call        ->  L_BRACKET<expr>R_BRACKET
+call                    ->  <primary><call_tail>
+primary                 ->  NUMBER|STRING|TRUE|FALSE|NIL|L_PAREN<expr>R_PAREN|IDENTIFIER|<array>|<map>
+call_tail               ->  <call_type><call_tail>|^
+call_type               ->  <method_call>|<indexed_call>
+method_call             ->  L_PAREN<args>R_PAREN
+args                    ->  <expr><args_tail>|^
+args_tail               ->  COMMA<expr>|^
+args_tail               ->  COMMA<expr>|^
 
-map                 ->  L_BRACE<map_entries>R_BRACE
-map_entries         ->  <expr>COLON<expr><map_entries_tail>|^
-map_entries_tail    ->  COMMA<map_entries>|^
+array                   ->  L_BRACKET<array_content>R_BRACKET
+array_content           ->  <expr><array_content_tail>|^
+array_content_tail      ->  COMMA<expr>|^
+
+indexed_call            ->  L_BRACKET<expr>R_BRACKET
+
+map                     ->  L_BRACE<map_entries>R_BRACE
+map_entries             ->  <expr>COLON<expr><map_entries_tail>|^
+map_entries_tail        ->  COMMA<map_entries>|^

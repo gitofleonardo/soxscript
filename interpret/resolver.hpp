@@ -79,6 +79,10 @@ protected:
 
     void visitMapExpr(MapExpr *expr) override;
 
+    void visitPrefixAutoUnaryExpr(PrefixAutoUnaryExpr *expr) override;
+
+    void visitSuffixAutoUnaryExpr(SuffixAutoUnaryExpr *expr) override;
+
 public:
     explicit Resolver(Interpreter *interpreter);
     ~Resolver() override;

@@ -11,7 +11,7 @@ fun main() {
     }
 
    println("");
-   for(var i = 0; i < 5; i = i + 1) {
+   for(var i = 0; i < 5; ++i) {
         print(i);
    }
 }
@@ -30,12 +30,12 @@ println("hello world");
 
 var arr = [1, "fun", "sox", 1.5, sox];
 arr[1] = "no fun";
-for (var i = 0; i < length(arr); i = i + 1) {
+for (var i = 0; i < length(arr); i++) {
     println(arr[i]);
 }
 
 var arr1 = ["hello", "sox"];
-for (var i = 0; i < length(arr1); i = i + 1) {
+for (var i = 0; i < length(arr1); ++i) {
     println(arr1[i]);
 }
 
@@ -55,14 +55,20 @@ map1[true] = "false";
 println(map1[true]);
 println(length(map1));
 
-fun varargsFunc1(a, b, varargs c) {
+fun varargsFunc1(a, b, reversed, varargs c) {
     print("a = " + a + ", b = " + b + ", and c = [");
     var length = length(c);
-    for (var i = 0; i < length; i = i + 1) {
-        print(c[i] + (i == length - 1 ? "" : ","));
+    if (!reversed) {
+        for (var i = 0; i < length; ++i) {
+            print(c[i] + (i == length - 1 ? "" : ","));
+        }
+    } else {
+        for (var i = length - 1; i >= 0; --i) {
+            print(c[i] + (i == 0 ? "" : ","));
+        }
     }
     println("]");
 }
 
-varargsFunc1("hello", "sox");
-varargsFunc1("hello", "sox", "and", "ukii");
+varargsFunc1("hello", "sox", false, "hello", "ukii");
+varargsFunc1("hello", "sox", true, "and", "ukii");

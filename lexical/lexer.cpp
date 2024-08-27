@@ -49,9 +49,9 @@ void Lexer::scanToken() {
     } else if (c == ';') {
         addToken(SEMICOLON);
     } else if (c == '+') {
-        addToken(PLUS);
+        addToken(match('+') ? PLUS_PLUS : PLUS);
     } else if (c == '-') {
-        addToken(MINUS);
+        addToken(match('-') ? MINUS_MINUS : MINUS);
     } else if (c == '*') {
         addToken(STAR);
     } else if (c == '?') {

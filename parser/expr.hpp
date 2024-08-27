@@ -213,6 +213,24 @@ public:
     }
 };
 
+class PrefixAutoUnaryExpr final : public Expr {
+public:
+    Expr *expr;
+    Token *op;
+
+    PrefixAutoUnaryExpr(Expr *expr, Token *op): expr(expr), op(op) {
+    }
+};
+
+class SuffixAutoUnaryExpr final : public Expr {
+public:
+    Expr *expr;
+    Token *op;
+
+    SuffixAutoUnaryExpr(Expr *expr, Token *op): expr(expr), op(op) {
+    }
+};
+
 template<class R>
 class ExprVisitor {
 public:
@@ -258,6 +276,12 @@ public:
         if (const auto mapExpr = dynamic_cast<MapExpr *>(expr)) {
             return visitMapExpr(mapExpr);
         }
+        if (const auto prefixAutoUnaryExpr = dynamic_cast<PrefixAutoUnaryExpr *>(expr)) {
+            return visitPrefixAutoUnaryExpr(prefixAutoUnaryExpr);
+        }
+        if (const auto suffixAutoUnaryExpr = dynamic_cast<SuffixAutoUnaryExpr *>(expr)) {
+            return visitSuffixAutoUnaryExpr(suffixAutoUnaryExpr);
+        }
         // This should not happen.
         throw std::runtime_error("Unknown expr type");
     }
@@ -288,6 +312,10 @@ protected:
     virtual R visitIndexedEleAssignExpr(ArrayElementAssignExpr *expr) = 0;
 
     virtual R visitMapExpr(MapExpr *expr) = 0;
+
+    virtual R visitPrefixAutoUnaryExpr(PrefixAutoUnaryExpr *expr) = 0;
+
+    virtual R visitSuffixAutoUnaryExpr(SuffixAutoUnaryExpr *expr) = 0;
 };
 
 #endif //EXPR_HPP
