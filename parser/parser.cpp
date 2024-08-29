@@ -4,10 +4,11 @@
 
 #include "parser.hpp"
 
+#include "expr_parser.hpp"
 #include "../utils/exception.hpp"
 #include "../utils/logger.hpp"
 
-Parser::Parser(const Lexer *lexer): lexer(lexer) {
+Parser::Parser(const std::vector<Token *> *tokens): _tokens(tokens) {
 }
 
 Parser::~Parser() = default;
@@ -22,7 +23,7 @@ std::vector<Stmt *> *Parser::parse() {
         while (!isAtEnd()) {
             stmts->push_back(statement());
         }
-    } catch ([[maybe_unused]] const std::exception &e) {
+    } catch ([[maybe_unused]] const ParserError &e) {
         synchronize();
     }
     return stmts;
@@ -338,8 +339,38 @@ Expr *Parser::finishIndexedCallExpr(Expr *callee) {
 
 Expr *Parser::primaryExpression() {
     Expr *expr = nullptr;
-    if (match(TRUE) || match(FALSE) || match(STRING) || match(INT) || match(DOUBLE)) {
+    if (match(TRUE) || match(FALSE) || match(INT) || match(DOUBLE)) {
         expr = new LiteralExpr(previous());
+    } else if (match(STRING)) {
+        const auto token = previous();
+        if (const auto strToken = dynamic_cast<StringToken *>(token)) {
+            std::vector<Expr *> values;
+            const auto tokenSize = strToken->tokens.size();
+            for (int i = 0; i < tokenSize;) {
+                auto tk = strToken->tokens[i];
+                if (tk->type() == STRING) {
+                    values.push_back(new LiteralExpr(tk));
+                    ++i;
+                    continue;
+                }
+                if (tk->type() == FILE_EOF) {
+                    break;
+                }
+                std::vector<Token *> exprTokens;
+                while (tk->type() != STRING) {
+                    exprTokens.push_back(tk);
+                    if (++i >= tokenSize) break;
+                    tk = strToken->tokens[i];
+                }
+                if (!exprTokens.empty()) {
+                    ExprParser exprParser(&exprTokens);
+                    values.push_back(exprParser.expression());
+                }
+            }
+            expr = new StringLiteralExpr(values);
+        } else {
+            error(token, "Wrong state, please check the lexer.");
+        }
     } else if (match(L_PAREN)) {
         const auto grouping = expression();
         consume(R_PAREN, "Missing ')'");
@@ -382,7 +413,7 @@ Expr *Parser::primaryExpression() {
 }
 
 Token *Parser::peek() const {
-    return lexer->getTokenAt(currentIndex);
+    return _currentIndex < _tokens->size() ? _tokens->at(_currentIndex) : _tokens->at(_tokens->size() - 1);
 }
 
 bool Parser::check(const TokenType expected) const {
@@ -391,12 +422,12 @@ bool Parser::check(const TokenType expected) const {
 }
 
 Token *Parser::advance() {
-    if (!isAtEnd()) ++currentIndex;
+    if (!isAtEnd()) ++_currentIndex;
     return previous();
 }
 
 Token *Parser::previous() const {
-    return lexer->getTokenAt(currentIndex - 1);
+    return _tokens->at(_currentIndex - 1);
 }
 
 Token *Parser::consume(const TokenType type, const std::string &errorMessage) {

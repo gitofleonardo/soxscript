@@ -72,3 +72,10 @@ fun varargsFunc1(a, b, reversed, varargs c) {
 
 varargsFunc1("hello", "sox", false, "hello", "ukii");
 varargsFunc1("hello", "sox", true, "and", "ukii");
+
+var arrInside = ["hello", "sox", "and", "kitty"];
+var str = "hello ${arrInside[1]} and ${arrInside[3]} and ${}";
+println(str);
+
+var varInPrint = "var in print";
+println("This is $varInPrint and it's legal");

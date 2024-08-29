@@ -37,7 +37,7 @@ public:
         if (token->type() == FILE_EOF) {
             report(token->line(), " at end", message);
         } else {
-            report(token->line(), AT_STR + *token->lexeme(), message);
+            report(token->line(), AT_STR + token->lexeme(), message);
         }
     }
 

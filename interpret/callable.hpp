@@ -5,7 +5,6 @@
 #ifndef CALLABLE_HPP
 #define CALLABLE_HPP
 #include <memory>
-#include <utility>
 
 #include "interpreter.hpp"
 #include "runtime_scope.hpp"
@@ -55,7 +54,7 @@ public:
         for (const auto argsEnd = isVarargs ? _fun->params->size() - 1 : _fun->params->size(); argsIndex < argsEnd; ++
              argsIndex) {
             const auto param = _fun->params->at(argsIndex);
-            funScope->define(*param->name->lexeme(), args[argsIndex]);
+            funScope->define(param->name->lexeme(), args[argsIndex]);
         }
         if (isVarargs) {
             const auto arrayParams = std::make_shared<ArrayValueHolder>();
@@ -63,7 +62,7 @@ public:
                 arrayParams->values.push_back(args[argsIndex]);
                 ++argsIndex;
             }
-            funScope->define(*_fun->params->at(_fun->params->size() - 1)->name->lexeme(), arrayParams);
+            funScope->define(_fun->params->at(_fun->params->size() - 1)->name->lexeme(), arrayParams);
         }
         try {
             interpreter->executeBlock(_fun->bodyBlock->stmts, funScope);

@@ -32,7 +32,7 @@ void Resolver::visitTernaryExpr(TernaryExpr *expr) {
 }
 
 void Resolver::visitVariableExpr(VariableExpr *expr) {
-    if (!_scopes.empty() && _scopes.back().contains(*expr->name->lexeme()) && _scopes.back()[*expr->name->lexeme()] ==
+    if (!_scopes.empty() && _scopes.back().contains(expr->name->lexeme()) && _scopes.back()[expr->name->lexeme()] ==
         false) {
         Logger::instance()->logError(expr->name, "");
     }
@@ -129,9 +129,9 @@ void Resolver::resolveFunction(const FunctionStmt *func) {
     _block_type = enclosingType;
 }
 
-void Resolver::resolveLocalVariable(Expr *expr, const std::string *name) const {
+void Resolver::resolveLocalVariable(Expr *expr, const std::string &name) const {
     for (int i = static_cast<int>(_scopes.size()) - 1; i >= 0; i--) {
-        if (_scopes[i].contains(*name)) {
+        if (_scopes[i].contains(name)) {
             _interpreter->resolve(static_cast<int>(_scopes.size()) - 1 - i, expr);
             return;
         }
@@ -150,7 +150,7 @@ void Resolver::define(const Token *name) {
     if (_scopes.empty()) {
         return;
     }
-    _scopes.back()[*name->lexeme()] = true;
+    _scopes.back()[name->lexeme()] = true;
 }
 
 void Resolver::declare(const Token *name) const {
@@ -158,10 +158,10 @@ void Resolver::declare(const Token *name) const {
         return;
     }
     auto top = _scopes.back();
-    if (top.contains(*name->lexeme())) {
+    if (top.contains(name->lexeme())) {
         Logger::instance()->logError(name, "Variable already declared.");
     }
-    top[*name->lexeme()] = false;
+    top[name->lexeme()] = false;
 }
 
 void Resolver::visitArrayExpr(ArrayExpr *expr) {
@@ -193,4 +193,10 @@ void Resolver::visitPrefixAutoUnaryExpr(PrefixAutoUnaryExpr *expr) {
 
 void Resolver::visitSuffixAutoUnaryExpr(SuffixAutoUnaryExpr *expr) {
     resolve(expr->expr);
+}
+
+void Resolver::visitStringLiteralExpr(StringLiteralExpr *expr) {
+    for (Expr *e : expr->values) {
+        resolve(e);
+    }
 }

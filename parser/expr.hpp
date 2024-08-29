@@ -72,6 +72,20 @@ public:
     ~LiteralExpr() override = default;
 };
 
+class StringLiteralExpr final : public Expr {
+public:
+    const std::vector<Expr *> values;
+
+    explicit StringLiteralExpr(std::vector<Expr *> values): values(std::move(values)) {
+    }
+
+    ~StringLiteralExpr() override {
+        for (auto &v: values) {
+            delete v;
+        }
+    }
+};
+
 class TernaryExpr final : public Expr {
 public:
     Expr *left;
@@ -282,6 +296,9 @@ public:
         if (const auto suffixAutoUnaryExpr = dynamic_cast<SuffixAutoUnaryExpr *>(expr)) {
             return visitSuffixAutoUnaryExpr(suffixAutoUnaryExpr);
         }
+        if (const auto stringLiteral = dynamic_cast<StringLiteralExpr *>(expr)) {
+            return visitStringLiteralExpr(stringLiteral);
+        }
         // This should not happen.
         throw std::runtime_error("Unknown expr type");
     }
@@ -316,6 +333,8 @@ protected:
     virtual R visitPrefixAutoUnaryExpr(PrefixAutoUnaryExpr *expr) = 0;
 
     virtual R visitSuffixAutoUnaryExpr(SuffixAutoUnaryExpr *expr) = 0;
+
+    virtual R visitStringLiteralExpr(StringLiteralExpr *expr) = 0;
 };
 
 #endif //EXPR_HPP

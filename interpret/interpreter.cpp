@@ -5,7 +5,6 @@
 #include "interpreter.hpp"
 
 #include <memory>
-#include <utility>
 
 #include "builtin.hpp"
 #include "callable.hpp"
@@ -71,7 +70,7 @@ void Interpreter::visitVarStmt(VarStmt *stmt) {
     const std::shared_ptr<ValueHolder> val = stmt->initializer != nullptr
                                                  ? evaluate(stmt->initializer)
                                                  : RuntimeScope::UNINITIALIZED_OBJECT;
-    _currentScope->define(*stmt->name->lexeme(), val);
+    _currentScope->define(stmt->name->lexeme(), val);
 }
 
 void Interpreter::visitBlockStmt(BlockStmt *stmt) {
@@ -98,7 +97,7 @@ void Interpreter::visitWhileStmt(WhileStmt *stmt) {
 void Interpreter::visitFunctionStmt(FunctionStmt *stmt) {
     const auto func = std::static_pointer_cast<ValueHolder>(
         std::make_shared<CallableHolder>(makeSharedCallable(new FunctionCallable(stmt, _currentScope, false))));
-    _currentScope->define(*stmt->name->lexeme(), func);
+    _currentScope->define(stmt->name->lexeme(), func);
 }
 
 void Interpreter::visitReturnStmt(ReturnStmt *stmt) {
@@ -237,8 +236,7 @@ std::shared_ptr<ValueHolder> Interpreter::visitLiteralExpr(LiteralExpr *expr) {
     std::shared_ptr<ValueHolder> result;
     switch (expr->value->type()) {
         case STRING: {
-            const auto lexeme = expr->value->lexeme();
-            auto str = lexeme->substr(1, lexeme->length() - 2);
+            auto str = expr->value->lexeme();
             result = std::make_shared<StringValueHolder>(str);
             break;
         }
@@ -251,11 +249,11 @@ std::shared_ptr<ValueHolder> Interpreter::visitLiteralExpr(LiteralExpr *expr) {
             break;
         }
         case DOUBLE: {
-            result = std::make_shared<DoubleValueHolder>(std::stod(*expr->value->lexeme()));
+            result = std::make_shared<DoubleValueHolder>(std::stod(expr->value->lexeme()));
             break;
         }
         case INT: {
-            result = std::make_shared<IntegerValueHolder>(std::stoi(*expr->value->lexeme()));
+            result = std::make_shared<IntegerValueHolder>(std::stoi(expr->value->lexeme()));
             break;
         }
         default: {
@@ -313,18 +311,18 @@ std::shared_ptr<ValueHolder> Interpreter::visitAssignExpr(AssignExpr *expr) {
     const auto value = evaluate(expr->value);
     if (_scopesTable.contains(expr)) {
         const int depth = _scopesTable[expr];
-        _currentScope->assign(depth, *expr->name->lexeme(), value);
+        _currentScope->assign(depth, expr->name->lexeme(), value);
     } else {
-        _globalScope->assign(*expr->name->lexeme(), value);
+        _globalScope->assign(expr->name->lexeme(), value);
     }
     return value;
 }
 
 std::shared_ptr<ValueHolder> Interpreter::lookup(const Token *name, Expr *expr) {
     if (_scopesTable.contains(expr)) {
-        return _currentScope->get(_scopesTable[expr], *name->lexeme());
+        return _currentScope->get(_scopesTable[expr], name->lexeme());
     }
-    return _globalScope->get(*name->lexeme());
+    return _globalScope->get(name->lexeme());
 }
 
 
@@ -507,4 +505,13 @@ std::shared_ptr<ValueHolder> Interpreter::visitSuffixAutoUnaryExpr(SuffixAutoUna
     }
     dynamic_cast<IntegerValueHolder *>(rvalue.get())->value = val;
     return std::make_shared<IntegerValueHolder>(oldVal);
+}
+
+std::shared_ptr<ValueHolder> Interpreter::visitStringLiteralExpr(StringLiteralExpr *expr) {
+    std::string result;
+    for (const auto insideExpr: expr->values) {
+        const auto value = evaluate(insideExpr);
+        result.append(value->toString());
+    }
+    return std::make_shared<StringValueHolder>(result);
 }

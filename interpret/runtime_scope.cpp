@@ -6,7 +6,6 @@
 
 #include <memory>
 #include <stdexcept>
-#include <utility>
 
 #include "callable.hpp"
 

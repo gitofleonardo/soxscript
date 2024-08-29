@@ -10,8 +10,8 @@
 #include "../lexical/lexer.hpp"
 
 class Parser {
-    ulong currentIndex = 0;
-    const Lexer *lexer;
+    ulong _currentIndex = 0;
+    const std::vector<Token *> *_tokens;
 
     [[nodiscard]] Token *peek() const;
 
@@ -38,7 +38,7 @@ class Parser {
     Expr *finishIndexedCallExpr(Expr *callee);
 
 public:
-    explicit Parser(const Lexer *lexer);
+    explicit Parser(const std::vector<Token *> *tokens);
 
     ~Parser();
 

@@ -28,7 +28,7 @@ class Resolver final : public ExprVisitor<void>, public StmtVisitor<void> {
 
     void resolveFunction(const FunctionStmt *func);
 
-    void resolveLocalVariable(Expr *expr, const std::string *name) const;
+    void resolveLocalVariable(Expr *expr, const std::string &name) const;
 
     void beginScope();
 
@@ -82,6 +82,8 @@ protected:
     void visitPrefixAutoUnaryExpr(PrefixAutoUnaryExpr *expr) override;
 
     void visitSuffixAutoUnaryExpr(SuffixAutoUnaryExpr *expr) override;
+
+    void visitStringLiteralExpr(StringLiteralExpr *expr) override;
 
 public:
     explicit Resolver(Interpreter *interpreter);

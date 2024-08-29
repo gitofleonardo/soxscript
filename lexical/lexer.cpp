@@ -17,7 +17,7 @@ void Lexer::tokenize() {
         start = current;
         scanToken();
     }
-    tokens.push_back(new Token(FILE_EOF, nullptr, line));
+    tokens.push_back(new Token(FILE_EOF, "", line));
 }
 
 Lexer::~Lexer() {
@@ -89,9 +89,9 @@ void Lexer::scanToken() {
     } else if (c == '"') {
         processStringLiteral();
     } else if (isLegalIdentifierPrefix(c)) {
-        processIdentifier();
+        processIdentifier(tokens);
     } else if (isDigit(c)) {
-        processNumberLiteral(c);
+        processNumberLiteral(c, tokens);
     }
 }
 
@@ -123,19 +123,27 @@ char Lexer::advance() {
     return c;
 }
 
-void Lexer::addToken(const TokenType type) {
-    const auto code = new std::string(codes->substr(start, current - start));
+void Lexer::addToken(std::vector<Token *> &tokens, const TokenType type, const uint start, const uint len) const {
+    const auto code = codes->substr(start, len);
     tokens.push_back(new Token(type, code, line));
 }
 
-void Lexer::processIdentifier() {
+void Lexer::addToken(std::vector<Token *> &tokens, const TokenType type) const {
+    addToken(tokens, type, start, current - start);
+}
+
+void Lexer::addToken(const TokenType type) {
+    addToken(tokens, type);
+}
+
+void Lexer::processIdentifier(std::vector<Token *> &tokens) {
     while (isLegalIdentifierChar(peek())) advance();
     const auto lexeme = codes->substr(start, current - start);
     const auto type = SoxKeywords::instance()->getKeyword(lexeme);
-    addToken(type);
+    addToken(tokens, type);
 }
 
-void Lexer::processNumberLiteral(const char c) {
+void Lexer::processNumberLiteral(const char c, std::vector<Token *> &tokens) {
     if (c != '0') {
         // decimal
         bool isDouble = false;
@@ -145,7 +153,7 @@ void Lexer::processNumberLiteral(const char c) {
             advance();
             while (isDigit(peek())) advance();
         }
-        addToken(isDouble ? DOUBLE : INT);
+        addToken(tokens, isDouble ? DOUBLE : INT);
     } else {
         if (peek() == 'x') {
             // hex
@@ -164,19 +172,103 @@ void Lexer::processNumberLiteral(const char c) {
             while (isLegalOctalNumber(peek())) advance();
         }
         const auto lexeme = codes->substr(start, current - start);
-        addToken(INT);
+        addToken(tokens, INT);
     }
 }
 
 void Lexer::processStringLiteral() {
-    while (peek() != '"' && !isAtEnd()) advance();
+    const auto originalStart = start;
+    // We don't need a '"' in string, so move start to current
+    start = current;
+    std::vector<Token *> stringTokens;
+    while (peek() != '"' && !isAtEnd()) {
+        if (const auto c = advance(); c == '$') {
+            // Minus 1, so that the '$' won't be added in string
+            addToken(stringTokens, STRING, start, current - start - 1);
+            if (match('{')) {
+                // Process expr
+                while (peek() != '}' && !isAtEnd()) {
+                    start = current;
+                    if (const char ch = advance(); ch == '(') {
+                        addToken(stringTokens, L_PAREN);
+                    } else if (ch == ')') {
+                        addToken(stringTokens, R_PAREN);
+                    } else if (ch == ',') {
+                        addToken(stringTokens, COMMA);
+                    } else if (ch == '.') {
+                        addToken(stringTokens, DOT);
+                    } else if (ch == ':') {
+                        addToken(stringTokens, COLON);
+                    } else if (ch == '+') {
+                        addToken(stringTokens, match('+') ? PLUS_PLUS : PLUS);
+                    } else if (ch == '-') {
+                        addToken(stringTokens, match('-') ? MINUS_MINUS : MINUS);
+                    } else if (ch == '*') {
+                        addToken(stringTokens, STAR);
+                    } else if (ch == '?') {
+                        addToken(stringTokens, QUESTION_MARK);
+                    } else if (ch == '[') {
+                        addToken(stringTokens, L_BRACKET);
+                    } else if (ch == ']') {
+                        addToken(stringTokens, R_BRACKET);
+                    } else if (ch == '!') {
+                        addToken(stringTokens, match('=') ? BANG_EQUAL : BANG);
+                    } else if (ch == '=') {
+                        addToken(stringTokens, match('=') ? EQUAL_EQUAL : EQUAL);
+                    } else if (ch == '>') {
+                        addToken(stringTokens, match('=') ? GREATER_EQUAL : GREATER);
+                    } else if (ch == '<') {
+                        addToken(stringTokens, match('=') ? LESS_EQUAL : LESS);
+                    } else if (ch == '|') {
+                        if (match('|')) {
+                            addToken(stringTokens, OR);
+                        } else {
+                            addToken(stringTokens, VERTICAL_BAR);
+                        }
+                    } else if (ch == '&') {
+                        if (match('&')) {
+                            addToken(stringTokens, AND);
+                        } else {
+                            error("Unexpected character '&'");
+                        }
+                    } else if (ch == '/') {
+                        addToken(stringTokens, SLASH);
+                    } else if (isLegalIdentifierPrefix(ch)) {
+                        processIdentifier(stringTokens);
+                    } else if (isDigit(ch)) {
+                        processNumberLiteral(ch, stringTokens);
+                    } else {
+                        error("Unexpected character");
+                    }
+                }
+                advance();
+                // Move to next after '}'
+                start = current;
+            } else {
+                // Process identifier
+                start = current;
+                processIdentifier(stringTokens);
+                start = current;
+            }
+        } else if (c == '\\') {
+            // cap
+            if (match('$')) {
+                start = current - 1;
+            }
+        }
+    }
     if (isAtEnd()) {
         error("Unterminated string literal");
         return;
     }
+    // Peek is '"', move to next
     advance();
-    auto stringLiteral = codes->substr(start + 1, current - start - 1);
-    addToken(STRING);
+    // We don't need '"' in string, so minus 1
+    addToken(stringTokens, STRING, start, current - start - 1);
+    stringTokens.push_back(new Token(FILE_EOF, "", line));
+    auto *token = new StringToken(codes->substr(originalStart + 1, current - originalStart - 2), line,
+                                  stringTokens);
+    tokens.push_back(token);
 }
 
 void Lexer::error(const std::string &error) const {
@@ -184,7 +276,7 @@ void Lexer::error(const std::string &error) const {
 }
 
 void Lexer::printTokens() const {
-    for (const auto &token : tokens) {
+    for (const auto &token: tokens) {
         std::cout << token->toString() << std::endl;
     }
 }
@@ -193,6 +285,10 @@ ulong Lexer::tokenSize() const {
     return tokens.size();
 }
 
-Token* Lexer::getTokenAt(const ulong index) const {
+Token *Lexer::getTokenAt(const ulong index) const {
     return tokens.at(index);
+}
+
+const std::vector<Token *> *Lexer::getTokens() const {
+    return &tokens;
 }

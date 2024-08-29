@@ -29,11 +29,15 @@ class Lexer {
 
     char advance();
 
+    void addToken(std::vector<Token *> &tokens, TokenType type, uint start, uint len) const;
+
+    void addToken(std::vector<Token *> &tokens, TokenType type) const;
+
     void addToken(TokenType type);
 
-    void processIdentifier();
+    void processIdentifier(std::vector<Token *> &tokens);
 
-    void processNumberLiteral(char c);
+    void processNumberLiteral(char c, std::vector<Token *> &tokens);
 
     void processStringLiteral();
 
@@ -52,6 +56,8 @@ public:
     [[nodiscard]] ulong tokenSize() const;
 
     [[nodiscard]] Token* getTokenAt(ulong index) const;
+
+    [[nodiscard]] const std::vector<Token *> *getTokens() const;
 
     ~Lexer();
 };

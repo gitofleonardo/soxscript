@@ -38,7 +38,7 @@ int runPrompt() {
 int runCodes(std::string *codes) {
     Lexer l(codes);
     l.tokenize();
-    Parser p(&l);
+    Parser p(l.getTokens());
     const auto stmts = p.parse();
     Interpreter interpreter;
     Resolver resolver(&interpreter);

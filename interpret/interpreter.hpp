@@ -86,6 +86,8 @@ protected:
     std::shared_ptr<ValueHolder> visitPrefixAutoUnaryExpr(PrefixAutoUnaryExpr *expr) override;
 
     std::shared_ptr<ValueHolder> visitSuffixAutoUnaryExpr(SuffixAutoUnaryExpr *expr) override;
+
+    std::shared_ptr<ValueHolder> visitStringLiteralExpr(StringLiteralExpr *expr) override;
 public:
     void executeBlock(std::vector<Stmt *> *stmts, std::shared_ptr<RuntimeScope> scope);
     std::shared_ptr<ValueHolder> evaluate(Expr *expr) const;

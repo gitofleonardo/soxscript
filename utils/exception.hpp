@@ -5,7 +5,6 @@
 #ifndef ERROR_HPP
 #define ERROR_HPP
 #include <exception>
-#include <utility>
 #include <memory>
 
 #include "../lexical/value_holder.hpp"
